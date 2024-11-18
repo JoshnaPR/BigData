@@ -65,17 +65,19 @@ def queryMatchingItems(query, category=None):
     min_tokens = (lambda x, y: x if x < y else y)(3, len(cleansed_query)) # Identifying the minimum number of tokens needed to match with a product.
     filtered_tokenized_df = filtered_tokenized_df.filter(f.size(f.col("matching_tokens")) > min_tokens) # Limiting the minimum required number of tokens to be identified to match.
     
-    # Defining a function within the scope of this function to filter by categories if need be.
-    def match_categories(categories):
-        parsed_categories = [entry.split('[')[0] for entry in categories if entry]
-        matched_cats = set(parsed_categories) & set(category)
-        return list(matched_cats)
+    '''
+    # # Defining a function within the scope of this function to filter by categories if need be.
+    # def match_categories(categories):
+    #     parsed_categories = [entry.split('[')[0] for entry in categories if entry]
+    #     matched_cats = set(parsed_categories) & set(category)
+    #     return list(matched_cats)
 
-    # If we specify a category, then we should filter based on the category too.
-    if category:
-        cat_match_udf = f.udf(match_categories, returnType=ArrayType(StringType()))
-        filtered_tokenized_df = filtered_tokenized_df.withColumn("Matching Categories", cat_match_udf(f.col("categories")))
-        filtered_tokenized_df = filtered_tokenized_df.filter(f.size(f.col("Matching Categories")) > 0)
+    # # If we specify a category, then we should filter based on the category too.
+    # if category:
+    #     cat_match_udf = f.udf(match_categories, returnType=ArrayType(StringType()))
+    #     filtered_tokenized_df = filtered_tokenized_df.withColumn("Matching Categories", cat_match_udf(f.col("categories")))
+    #     filtered_tokenized_df = filtered_tokenized_df.filter(f.size(f.col("Matching Categories")) > 0)
+    '''
     
     filtered_tokenized_df = filtered_tokenized_df.withColumn("token_match_count", f.size(f.col("matching_tokens")))
     filtered_tokenized_df = filtered_tokenized_df.orderBy(f.col("token_match_count").desc()) # Sort by descending order (So we can start with the highest number of matching tokens)
